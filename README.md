@@ -4,6 +4,10 @@ A small, local-first Windows utility for turning a cluttered Downloads folder in
 
 Downloads Cleaner previews how files will be organized, sorts them into sensible categories, and lets you undo the cleanup if you change your mind.
 
+## Preview
+
+![Downloads Cleaner preview](docs/downloads-cleaner-preview.png)
+
 ## Features
 
 - Preview changes before moving anything
