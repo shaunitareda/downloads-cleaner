@@ -1,0 +1,53 @@
+name: Downloads Cleaner Windows Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app.py"
+      - "organizer.py"
+      - "test_organizer.py"
+      - "README.md"
+      - "SPEC.md"
+      - ".github/workflows/windows-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run unit tests
+        run: python -m unittest -v test_organizer.py
+
+      - name: Install PyInstaller
+        run: python -m pip install --disable-pip-version-check pyinstaller==6.15.0
+
+      - name: Build portable EXE
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name DownloadsCleaner app.py
+
+      - name: Smoke-check artifact
+        shell: pwsh
+        run: |
+          $exe = Join-Path $PWD 'dist\DownloadsCleaner.exe'
+          if (-not (Test-Path $exe)) { throw 'DownloadsCleaner.exe was not created' }
+          $item = Get-Item $exe
+          Write-Host "Built $($item.FullName) ($($item.Length) bytes)"
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: DownloadsCleaner-windows-x64
+          path: dist/DownloadsCleaner.exe
+          if-no-files-found: error
